@@ -379,146 +379,220 @@ class _NutricionistaPerfilPacienteScreenState
 
   // --- NOVOS WIDGETS DE GRÁFICO ---
   Widget _buildGraficosNutricionais(PlanoAlimentar plano) {
-    // 1. Calcula Totais
-    double totalCarb = 0, totalProt = 0, totalGord = 0;
-    double totalFibra = 0, totalCalcio = 0, totalFerro = 0, totalVitC = 0;
+  // 1. Inicializa Totais (Macros e Micros)
+  double totalCarb = 0, totalProt = 0, totalGord = 0, totalKcalPlano = 0;
+  double totalFibra = 0, totalCalcio = 0, totalFerro = 0, totalVitC = 0;
+  double totalZinco = 0, totalMagnesio = 0, totalPotassio = 0, totalVitA = 0;
+  double totalRiboflavina = 0, totalNiacina = 0;
 
-    for (var ref in plano.refeicoes) {
-      for (var ali in ref.alimentos) {
-        // Conversão de proporção (já que os dados do DB podem ser por 100g ou por porção)
-        // Assumindo que a classe Alimento já traz calculado ou precisa calcular:
-        // Se a classe Alimento armazena por 100g, precisamos calcular: (valor * quantidade) / 100
-        // Se a classe já armazena o valor total da porção, apenas somamos.
-        // Vou assumir que Alimento.carboidratos já é o total daquela quantidade (conforme refeiçao.dart)
-        // Se não for, ajuste aqui.
-        
-        totalCarb += ali.carboidratos;
-        totalProt += ali.proteinas;
-        totalGord += ali.gorduras;
-        
-        // Se tiver micros na classe Alimento (assumindo que foram adicionados)
-        // Usamos try/catch ou valores padrão caso a classe ainda não tenha sido atualizada no hot reload
-        try { totalFibra += (ali.fibras); } catch (_) {}
-        try { totalCalcio += (ali.calcio); } catch (_) {}
-        try { totalFerro += (ali.ferro); } catch (_) {}
-        try { totalVitC += (ali.vitC); } catch (_) {}
-      }
+  for (var ref in plano.refeicoes) {
+    for (var ali in ref.alimentos) {
+      totalCarb += ali.carboidratos;
+      totalProt += ali.proteinas;
+      totalGord += ali.gorduras;
+      totalKcalPlano += ali.calorias;
+      
+      // Micros
+      totalFibra += ali.fibras;
+      totalCalcio += ali.calcio;
+      totalFerro += ali.ferro;
+      totalVitC += ali.vitC;
+      totalZinco += ali.zinco;
+      totalMagnesio += ali.magnesio;
+      totalPotassio += ali.potassio;
+      totalVitA += ali.vitA;
+      totalRiboflavina += ali.riboflavina;
+      totalNiacina += ali.niacina;
     }
-
-    // 2. Prepara Macros (em Kcal para % correta)
-    double kcalCarb = totalCarb * 4;
-    double kcalProt = totalProt * 4;
-    double kcalGord = totalGord * 9;
-    double totalKcal = kcalCarb + kcalProt + kcalGord;
-
-    return Column(
-      children: [
-        // CARD MACROS
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-          ),
-          child: Column(
-            children: [
-              const Text("Distribuição de Macronutrientes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              const SizedBox(height: 15),
-              SizedBox(
-                height: 150,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: PieChart(
-                        PieChartData(
-                          sectionsSpace: 2,
-                          centerSpaceRadius: 30,
-                          sections: [
-                            _buildPieSection(kcalCarb, totalKcal, Colors.orange, "Carb"),
-                            _buildPieSection(kcalProt, totalKcal, Colors.blue, "Prot"),
-                            _buildPieSection(kcalGord, totalKcal, Colors.red, "Gord"),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLegendItem("Carboidratos", Colors.orange, "${totalCarb.toStringAsFixed(0)}g"),
-                          _buildLegendItem("Proteínas", Colors.blue, "${totalProt.toStringAsFixed(0)}g"),
-                          _buildLegendItem("Gorduras", Colors.red, "${totalGord.toStringAsFixed(0)}g"),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 15),
-        
-        // CARD MICROS
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-          ),
-          child: Column(
-            children: [
-              const Text("Principais Micronutrientes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              const SizedBox(height: 15),
-              SizedBox(
-                height: 150,
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: PieChart(
-                        PieChartData(
-                          sectionsSpace: 2,
-                          centerSpaceRadius: 30,
-                          sections: [
-                            // Convertendo Fibra (g) para mg (x1000) para ficar visível na escala
-                            PieChartSectionData(value: totalFibra * 1000, color: Colors.green, radius: 15, showTitle: false),
-                            PieChartSectionData(value: totalCalcio, color: Colors.indigo, radius: 15, showTitle: false),
-                            PieChartSectionData(value: totalFerro, color: Colors.brown, radius: 15, showTitle: false),
-                            PieChartSectionData(value: totalVitC, color: Colors.orangeAccent, radius: 15, showTitle: false),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildLegendItem("Fibras", Colors.green, "${totalFibra.toStringAsFixed(1)}g"),
-                          _buildLegendItem("Cálcio", Colors.indigo, "${totalCalcio.toStringAsFixed(0)}mg"),
-                          _buildLegendItem("Ferro", Colors.brown, "${totalFerro.toStringAsFixed(1)}mg"),
-                          _buildLegendItem("Vit. C", Colors.orangeAccent, "${totalVitC.toStringAsFixed(1)}mg"),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
   }
+
+  // 2. Prepara Macros para a Pizza
+  double kcalCarb = totalCarb * 4;
+  double kcalProt = totalProt * 4;
+  double kcalGord = totalGord * 9;
+  double totalKcalMacros = kcalCarb + kcalProt + kcalGord;
+
+  return Column(
+    children: [
+      // --- CARD MACROS ---
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        ),
+        child: Column(
+          children: [
+            Text(
+              "Distribuição de Macronutrientes (${totalKcalPlano.toStringAsFixed(0)} kcal)", 
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)
+            ),
+            const SizedBox(height: 15),
+            SizedBox(
+              height: 150,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: PieChart(
+                      PieChartData(
+                        sectionsSpace: 2,
+                        centerSpaceRadius: 30,
+                        sections: [
+                          _buildPieSection(kcalCarb, totalKcalMacros, Colors.orange, "Carb"),
+                          _buildPieSection(kcalProt, totalKcalMacros, Colors.blue, "Prot"),
+                          _buildPieSection(kcalGord, totalKcalMacros, Colors.red, "Gord"),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildLegendItem("Carboidratos", Colors.orange, "${totalCarb.toStringAsFixed(0)}g"),
+                        _buildLegendItem("Proteínas", Colors.blue, "${totalProt.toStringAsFixed(0)}g"),
+                        _buildLegendItem("Gorduras", Colors.red, "${totalGord.toStringAsFixed(0)}g"),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      const SizedBox(height: 15),
+      
+      // --- CARD TODOS OS MICROS (LISTA COMPLETA) ---
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("Detalhamento de Micronutrientes", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 15),
+            
+            // Grid de 2 colunas para mostrar todos os itens
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              childAspectRatio: 4,
+              mainAxisSpacing: 5,
+              crossAxisSpacing: 20,
+              children: [
+                _buildMicroGridItem("Fibras", "${totalFibra.toStringAsFixed(1)}g", Colors.green),
+                _buildMicroGridItem("Cálcio", "${totalCalcio.toStringAsFixed(0)}mg", Colors.indigo),
+                _buildMicroGridItem("Ferro", "${totalFerro.toStringAsFixed(1)}mg", Colors.brown),
+                _buildMicroGridItem("Vit. C", "${totalVitC.toStringAsFixed(1)}mg", Colors.orangeAccent),
+                _buildMicroGridItem("Zinco", "${totalZinco.toStringAsFixed(1)}mg", Colors.blueGrey),
+                _buildMicroGridItem("Magnésio", "${totalMagnesio.toStringAsFixed(0)}mg", Colors.teal),
+                _buildMicroGridItem("Potássio", "${totalPotassio.toStringAsFixed(0)}mg", Colors.deepPurple),
+                _buildMicroGridItem("Vit. A", "${totalVitA.toStringAsFixed(0)}µg", Colors.red),
+                _buildMicroGridItem("Ribofla. (B2)", "${totalRiboflavina.toStringAsFixed(2)}mg", Colors.amber),
+                _buildMicroGridItem("Niacina (B3)", "${totalNiacina.toStringAsFixed(1)}mg", Colors.deepOrange),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+void _mostrarDetalhesMicros(
+  BuildContext context,
+  double fibra, double calcio, double ferro, double zinco,
+  double magnesio, double potassio, double vitA, double vitC,
+  double tiamina, double ribof, double pirid, double niacina,
+) {
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+    builder: (context) => Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 20),
+          const Text("Relatório de Micronutrientes", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 20),
+          Expanded(
+            child: GridView(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+              ),
+              children: [
+                _buildMicroItem("Fibras", fibra, "g"),
+                _buildMicroItem("Cálcio", calcio, "mg"),
+                _buildMicroItem("Ferro", ferro, "mg"),
+                _buildMicroItem("Zinco", zinco, "mg"),
+                _buildMicroItem("Magnésio", magnesio, "mg"),
+                _buildMicroItem("Potássio", potassio, "mg"),
+                _buildMicroItem("Vitamina A", vitA, "µg"),
+                _buildMicroItem("Vitamina C", vitC, "mg"),
+                _buildMicroItem("Tiamina (B1)", tiamina, "mg"),
+                _buildMicroItem("Ribofla. (B2)", ribof, "mg"),
+                _buildMicroItem("Piridox. (B6)", pirid, "mg"),
+                _buildMicroItem("Niacina (B3)", niacina, "mg"),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildMicroItem(String nome, double valor, String unidade) {
+  return Container(
+    padding: const EdgeInsets.all(8),
+    decoration: BoxDecoration(
+      color: Colors.grey[50],
+      borderRadius: BorderRadius.circular(10),
+      border: Border.all(color: Colors.grey[200]!),
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(nome, style: const TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold)),
+        Text("${valor.toStringAsFixed(valor < 1 ? 2 : 1)} $unidade", 
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.black87)),
+      ],
+    ),
+  );
+}
+
+// Widget auxiliar para os itens da grade de micronutrientes
+Widget _buildMicroGridItem(String label, String value, Color color) {
+  return Row(
+    children: [
+      Container(width: 6, height: 6, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+      const SizedBox(width: 8),
+      Text(label, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+      const Spacer(),
+      Text(value, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+    ],
+  );
+}
 
   PieChartSectionData _buildPieSection(double value, double total, Color color, String title) {
     final percent = total > 0 ? (value / total * 100) : 0.0;

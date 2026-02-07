@@ -6,17 +6,19 @@ class Alimento {
   final double proteinas;
   final double carboidratos;
   final double gorduras;
-  double  quantidade;
+  double quantidade;
   String unidade;
   
-  // Novos campos
   final double fibras;
   final double calcio;
   final double magnesio;
   final double ferro;
   final double potassio;
+  final double zinco;
   final double vitC;
-  final double vitA; // Geralmente RAE
+  final double vitA;
+  final double riboflavina;
+  final double niacina;
 
   Alimento({
     required this.id,
@@ -28,15 +30,16 @@ class Alimento {
     required this.gorduras,
     this.quantidade = 100,
     this.unidade = 'g',
-    
-    // Inicializando com padrão 0.0 caso não venha
     this.fibras = 0.0,
     this.calcio = 0.0,
     this.magnesio = 0.0,
     this.ferro = 0.0,
     this.potassio = 0.0,
+    this.zinco = 0.0,
     this.vitC = 0.0,
     this.vitA = 0.0,
+    this.riboflavina = 0.0, 
+    this.niacina = 0.0,
   });
 
   Map<String, dynamic> toMap() {
@@ -50,39 +53,38 @@ class Alimento {
       'gorduras': gorduras,
       'quantidade': quantidade,
       'unidade': unidade,
-      
-      // Novos campos
       'fibras': fibras,
       'calcio': calcio,
       'magnesio': magnesio,
       'ferro': ferro,
       'potassio': potassio,
+      'zinco': zinco,
       'vitC': vitC,
       'vitA': vitA,
+      'riboflavina': riboflavina,
+      'niacina': niacina,
     };
   }
 
-  // CORREÇÃO AQUI: Usamos (valor as num?)?.toDouble() para aceitar tanto int quanto double
   factory Alimento.fromMap(Map<String, dynamic> map) {
     return Alimento(
       id: map['id']?.toString() ?? '',
       nome: map['nome']?.toString() ?? '',
       categoria: map['categoria']?.toString() ?? 'Geral',
-      
-      // O 'num' é o pai de 'int' e 'double', então aceita ambos e converte
       calorias: (map['calorias'] as num?)?.toDouble() ?? 0.0,
       proteinas: (map['proteinas'] as num?)?.toDouble() ?? 0.0,
       carboidratos: (map['carboidratos'] as num?)?.toDouble() ?? 0.0,
       gorduras: (map['gorduras'] as num?)?.toDouble() ?? 0.0,
-
       fibras: (map['fibras'] as num?)?.toDouble() ?? 0.0,
       calcio: (map['calcio'] as num?)?.toDouble() ?? 0.0,
       magnesio: (map['magnesio'] as num?)?.toDouble() ?? 0.0,
       ferro: (map['ferro'] as num?)?.toDouble() ?? 0.0,
       potassio: (map['potassio'] as num?)?.toDouble() ?? 0.0,
+      zinco: (map['zinco'] as num?)?.toDouble() ?? 0.0,
       vitC: (map['vitC'] as num?)?.toDouble() ?? 0.0,
-      vitA: (map['vitA'] as num?)?.toDouble() ?? 0.0 ,
-      
+      vitA: (map['vitA'] as num?)?.toDouble() ?? 0.0,
+      riboflavina: (map['riboflavina'] as num?)?.toDouble() ?? 0.0,
+      niacina: (map['niacina'] as num?)?.toDouble() ?? 0.0,
       quantidade: (map['quantidade'] as num?)?.toDouble() ?? 100.0,
       unidade: map['unidade']?.toString() ?? 'g',
     );

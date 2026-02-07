@@ -368,7 +368,9 @@ class _AlimentoSelectionModalState extends State<_AlimentoSelectionModal> {
   }
 
   void _confirmarQtd(Alimento base) {
+    // Definimos 100g como padrão inicial
     final ctrl = TextEditingController(text: '100');
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -376,29 +378,83 @@ class _AlimentoSelectionModalState extends State<_AlimentoSelectionModal> {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(base.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-        content: TextField(
-          controller: ctrl,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Quantidade (g)', suffixText: 'g', border: OutlineInputBorder()),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Informe a quantidade desejada para calcular os nutrientes proporcionalmente.",
+              style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 15),
+            TextField(
+              controller: ctrl,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Quantidade',
+                suffixText: 'g',
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.verde, width: 2),
+                ),
+              ),
+            ),
+          ],
         ),
         actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+          ),
           ElevatedButton(
             onPressed: () {
-              double qtd = double.tryParse(ctrl.text) ?? 100;
+              // Pegamos a quantidade digitada ou 100 como fallback
+              double qtdDigitada = double.tryParse(ctrl.text.replaceAll(',', '.')) ?? 100;
+
+              // Função interna para aplicar a regra de três: (Valor na Tabela * Qtd Digitada) / 100
+              double calcularProporcao(double valorOriginal) {
+                return (valorOriginal * qtdDigitada) / 100;
+              }
+
+              // Criamos a nova instância do alimento com os valores recalculados
               final novo = Alimento(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
-                nome: base.nome, calorias: base.calorias, proteinas: base.proteinas,
-                carboidratos: base.carboidratos, gorduras: base.gorduras,
-                quantidade: qtd, unidade: 'g', categoria: base.categoria,
-                // Copia os micros também
-                fibras: base.fibras, calcio: base.calcio, magnesio: base.magnesio,
-                ferro: base.ferro, potassio: base.potassio, vitA: base.vitA, vitC: base.vitC,
+                nome: base.nome,
+                categoria: base.categoria,
+                unidade: 'g',
+                quantidade: qtdDigitada,
+                
+                // Macros Recalculados
+                calorias: calcularProporcao(base.calorias),
+                proteinas: calcularProporcao(base.proteinas),
+                carboidratos: calcularProporcao(base.carboidratos),
+                gorduras: calcularProporcao(base.gorduras),
+
+                fibras: calcularProporcao(base.fibras),
+                calcio: calcularProporcao(base.calcio),
+                magnesio: calcularProporcao(base.magnesio),
+                ferro: calcularProporcao(base.ferro),
+                potassio: calcularProporcao(base.potassio),
+                
+                // ADICIONAR ESTAS 3 LINHAS ABAIXO:
+                zinco: calcularProporcao(base.zinco),
+                riboflavina: calcularProporcao(base.riboflavina),
+                niacina: calcularProporcao(base.niacina),
+
+                vitA: calcularProporcao(base.vitA),
+                vitC: calcularProporcao(base.vitC),
               );
-              Navigator.pop(ctx); 
-              widget.onAlimentoSelected(novo);
-              Navigator.pop(context); 
+
+              Navigator.pop(ctx); // Fecha o Dialog de quantidade
+              widget.onAlimentoSelected(novo); // Envia o alimento recalculado
+              Navigator.pop(context); // Fecha o Modal de busca/seleção
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.verde, shape: AppStyles.shapeButton),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.verde,
+              shape: AppStyles.shapeButton,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
             child: const Text("Adicionar", style: TextStyle(color: Colors.white)),
           )
         ],
@@ -501,6 +557,9 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
   final _potassioCtrl = TextEditingController();
   final _vitACtrl = TextEditingController();
   final _vitCCtrl = TextEditingController();
+  final _zincoCtrl = TextEditingController();
+  final _ribofCtrl = TextEditingController();
+  final _niacinaCtrl = TextEditingController();
 
   void _salvar() {
     if (_formKey.currentState!.validate()) {
@@ -523,6 +582,9 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
         magnesio: double.tryParse(_magnesioCtrl.text) ?? 0,
         ferro: double.tryParse(_ferroCtrl.text) ?? 0,
         potassio: double.tryParse(_potassioCtrl.text) ?? 0,
+        zinco: double.tryParse(_zincoCtrl.text) ?? 0,
+        riboflavina: double.tryParse(_ribofCtrl.text) ?? 0,
+        niacina: double.tryParse(_niacinaCtrl.text) ?? 0,
         vitA: double.tryParse(_vitACtrl.text) ?? 0,
         vitC: double.tryParse(_vitCCtrl.text) ?? 0,
       );
@@ -598,13 +660,25 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                       ]),
                       const SizedBox(height: 10),
 
-                      // Linha 3: Potássio
-                      _buildInput(_potassioCtrl, "Potássio (mg)"),
+                      // Linha 3: Zinco e Riboflavina (Vitamina B2)
+                      Row(children: [
+                        Expanded(child: _buildInput(_zincoCtrl, "Zinco (mg)")),
+                        const SizedBox(width: 10),
+                        Expanded(child: _buildInput(_ribofCtrl, "B2/Ribof. (mg)")),
+                      ]),
                       const SizedBox(height: 10),
 
-                      // Linha 4: Vitaminas
+                      // Linha 4: Niacina (Vitamina B3) e Potássio
                       Row(children: [
-                        Expanded(child: _buildInput(_vitACtrl, "Vit. A (RAE)")),
+                        Expanded(child: _buildInput(_niacinaCtrl, "B3/Niacina (mg)")),
+                        const SizedBox(width: 10),
+                        Expanded(child: _buildInput(_potassioCtrl, "Potássio (mg)")),
+                      ]),
+                      const SizedBox(height: 10),
+
+                      // Linha 5: Vitamina A e Vitamina C
+                      Row(children: [
+                        Expanded(child: _buildInput(_vitACtrl, "Vit. A (mcg)")),
                         const SizedBox(width: 10),
                         Expanded(child: _buildInput(_vitCCtrl, "Vit. C (mg)")),
                       ]),
