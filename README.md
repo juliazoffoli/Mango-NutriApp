@@ -70,25 +70,25 @@ Projeto idealizado e desenvolvido por:
 <table>
   <tr>
     <td align="center">
-      <a href="LINK_DO_LINKEDIN_ROBERT">
+      <a href="https://github.com/juliazoffoli">
+        <img src="https://ui-avatars.com/api/?name=Julia+Zoffoli&background=0D8ABC&color=fff" width="100px;" alt="Foto da Julia"/><br>
+        <sub><b>Julia Zoffoli</b></sub>
+      </a><br>
+      Database & Logic
+    </td>
+    <td align="center">
+      <a href="https://github.com/robertgvds">
         <img src="https://ui-avatars.com/api/?name=Robert+Goncalves&background=0D8ABC&color=fff" width="100px;" alt="Foto do Robert"/><br>
         <sub><b>Robert Gonçalves</b></sub>
       </a><br>
       Full Stack & Architecture
     </td>
     <td align="center">
-      <a href="LINK_DO_LINKEDIN_RUBIA">
+      <a href="https://github.com/rviol">
         <img src="https://ui-avatars.com/api/?name=Rubia+Viol&background=0D8ABC&color=fff" width="100px;" alt="Foto da Rubia"/><br>
         <sub><b>Rubia Viol</b></sub>
       </a><br>
       UI/UX & Frontend Dev
-    </td>
-    <td align="center">
-      <a href="LINK_DO_LINKEDIN_JULIA">
-        <img src="https://ui-avatars.com/api/?name=Julia+Zoffoli&background=0D8ABC&color=fff" width="100px;" alt="Foto da Julia"/><br>
-        <sub><b>Julia Zoffoli</b></sub>
-      </a><br>
-      Database & Logic
     </td>
   </tr>
 </table>
