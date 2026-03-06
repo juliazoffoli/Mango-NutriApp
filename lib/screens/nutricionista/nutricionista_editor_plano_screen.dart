@@ -76,7 +76,6 @@ class _NutricionistaEditorPlanoScreenState
     }
   }
 
-  // --- Modal Nova Refeição ---
   void _addRefeicao() {
     final nomeCtrl = TextEditingController();
     final horaCtrl = TextEditingController();
@@ -153,9 +152,89 @@ class _NutricionistaEditorPlanoScreenState
     );
   }
 
+  Widget _buildResumoPlano() {
+    double totalKcal = 0;
+    double totalProt = 0;
+    double totalCarb = 0;
+    double totalGord = 0;
+
+    for (var ref in _planoEmEdicao.refeicoes) {
+      for (var ali in ref.alimentos) {
+        totalKcal += ali.calorias;
+        totalProt += ali.proteinas;
+        totalCarb += ali.carboidratos;
+        totalGord += ali.gorduras;
+      }
+    }
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.verde.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.verde.withOpacity(0.2)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.calculate_outlined, color: AppColors.verde),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("TOTAL DO PLANO", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Text(
+                    "${totalKcal.toStringAsFixed(2)} kcal",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.verde),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const Divider(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildMacroBadge("Carb", "${totalCarb.toStringAsFixed(1)}g", Colors.orange),
+              _buildMacroBadge("Prot", "${totalProt.toStringAsFixed(1)}g", Colors.blue),
+              _buildMacroBadge("Gord", "${totalGord.toStringAsFixed(1)}g", Colors.red),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  // WIDGET ALTERADO: Formato linear (carb: x g), sem pular linha e com fonte menor (12)
+  Widget _buildMacroBadge(String label, String valor, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "$label: ", 
+            style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.bold)
+          ),
+          Text(
+            valor, 
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: color)
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Ordena refeições por horário
     _planoEmEdicao.refeicoes.sort((a, b) => a.horario.compareTo(b.horario));
 
     return Scaffold(
@@ -167,7 +246,6 @@ class _NutricionistaEditorPlanoScreenState
         centerTitle: true,
         leading: IconButton(icon: const Icon(Icons.arrow_back, color: Colors.white), onPressed: () => Navigator.pop(context)),
       ),
-      // Botão Salvar Fixo no Rodapé
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(color: Colors.white, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, -5))]),
@@ -213,6 +291,7 @@ class _NutricionistaEditorPlanoScreenState
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
+                    _buildResumoPlano(), 
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton.icon(
@@ -228,21 +307,7 @@ class _NutricionistaEditorPlanoScreenState
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    if (_planoEmEdicao.refeicoes.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.all(40),
-                        child: Column(
-                          children: [
-                            Icon(Icons.restaurant_menu, size: 60, color: Colors.grey),
-                            SizedBox(height: 10),
-                            Text("Nenhuma refeição adicionada.", style: TextStyle(color: Colors.grey)),
-                          ],
-                        ),
-                      ),
-
                     ..._planoEmEdicao.refeicoes.map((ref) => _buildRefeicaoCard(ref)),
-                    
                     const SizedBox(height: 20),
                   ],
                 ),
@@ -255,6 +320,8 @@ class _NutricionistaEditorPlanoScreenState
   }
 
   Widget _buildRefeicaoCard(Refeicao ref) {
+    double totalKcalRef = ref.alimentos.fold(0, (sum, item) => sum + item.calorias);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -274,16 +341,26 @@ class _NutricionistaEditorPlanoScreenState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: AppColors.verde, borderRadius: BorderRadius.circular(8)),
-                      child: Text(ref.horario, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(ref.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ],
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: AppColors.verde, borderRadius: BorderRadius.circular(8)),
+                        child: Text(ref.horario, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                      ),
+                      const SizedBox(width: 10),
+                      Flexible(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(ref.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text("${totalKcalRef.toStringAsFixed(1)} kcal", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: Colors.red),
@@ -296,25 +373,30 @@ class _NutricionistaEditorPlanoScreenState
           if (ref.alimentos.isEmpty)
             const Padding(padding: EdgeInsets.all(20), child: Text("Sem alimentos nesta refeição", style: TextStyle(color: Colors.grey, fontSize: 12)))
           else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              itemCount: ref.alimentos.length,
-              separatorBuilder: (ctx, i) => const Divider(height: 1),
-              itemBuilder: (ctx, i) {
-                final ali = ref.alimentos[i];
-                return ListTile(
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            itemCount: ref.alimentos.length,
+            itemBuilder: (ctx, i) {
+              final ali = ref.alimentos[i];
+              return Container(
+                key: ValueKey(ali.id), 
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
+                ),
+                child: ListTile(
                   dense: true,
                   title: Text(ali.nome, style: const TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: Text("${ali.quantidade.toStringAsFixed(0)}g  •  ${ali.calorias.toStringAsFixed(0)} kcal"),
+                  subtitle: Text("${ali.quantidade.toStringAsFixed(0)}g  •  ${ali.calorias.toStringAsFixed(2)} kcal"),
                   trailing: IconButton(
                     icon: const Icon(Icons.close, size: 18, color: Colors.grey),
                     onPressed: () => setState(() => ref.alimentos.remove(ali)),
                   ),
-                );
-              },
-            ),
+                ),
+              );
+            },
+          ),
           
           const Divider(height: 1),
           TextButton.icon(
@@ -333,7 +415,6 @@ class _NutricionistaEditorPlanoScreenState
   }
 }
 
-// --- MODAL DE SELEÇÃO DE ALIMENTO ---
 class _AlimentoSelectionModal extends StatefulWidget {
   final Function(Alimento) onAlimentoSelected;
   const _AlimentoSelectionModal({required this.onAlimentoSelected});
@@ -368,7 +449,6 @@ class _AlimentoSelectionModalState extends State<_AlimentoSelectionModal> {
   }
 
   void _confirmarQtd(Alimento base) {
-    // Definimos 100g como padrão inicial
     final ctrl = TextEditingController(text: '100');
 
     showDialog(
@@ -409,46 +489,37 @@ class _AlimentoSelectionModalState extends State<_AlimentoSelectionModal> {
           ),
           ElevatedButton(
             onPressed: () {
-              // Pegamos a quantidade digitada ou 100 como fallback
               double qtdDigitada = double.tryParse(ctrl.text.replaceAll(',', '.')) ?? 100;
 
-              // Função interna para aplicar a regra de três: (Valor na Tabela * Qtd Digitada) / 100
               double calcularProporcao(double valorOriginal) {
                 return (valorOriginal * qtdDigitada) / 100;
               }
 
-              // Criamos a nova instância do alimento com os valores recalculados
               final novo = Alimento(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 nome: base.nome,
                 categoria: base.categoria,
                 unidade: 'g',
                 quantidade: qtdDigitada,
-                
-                // Macros Recalculados
                 calorias: calcularProporcao(base.calorias),
                 proteinas: calcularProporcao(base.proteinas),
                 carboidratos: calcularProporcao(base.carboidratos),
                 gorduras: calcularProporcao(base.gorduras),
-
                 fibras: calcularProporcao(base.fibras),
                 calcio: calcularProporcao(base.calcio),
                 magnesio: calcularProporcao(base.magnesio),
                 ferro: calcularProporcao(base.ferro),
                 potassio: calcularProporcao(base.potassio),
-                
-                // ADICIONAR ESTAS 3 LINHAS ABAIXO:
                 zinco: calcularProporcao(base.zinco),
                 riboflavina: calcularProporcao(base.riboflavina),
                 niacina: calcularProporcao(base.niacina),
-
                 vitA: calcularProporcao(base.vitA),
                 vitC: calcularProporcao(base.vitC),
               );
 
-              Navigator.pop(ctx); // Fecha o Dialog de quantidade
-              widget.onAlimentoSelected(novo); // Envia o alimento recalculado
-              Navigator.pop(context); // Fecha o Modal de busca/seleção
+              Navigator.pop(ctx); 
+              widget.onAlimentoSelected(novo); 
+              Navigator.pop(context); 
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.verde,
@@ -531,7 +602,6 @@ class _AlimentoSelectionModalState extends State<_AlimentoSelectionModal> {
   }
 }
 
-// --- TELA CRIAR ALIMENTO PERSONALIZADO (ATUALIZADA) ---
 class _CriarAlimentoScreen extends StatefulWidget {
   const _CriarAlimentoScreen();
   @override
@@ -541,7 +611,6 @@ class _CriarAlimentoScreen extends StatefulWidget {
 class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
   final _formKey = GlobalKey<FormState>();
   
-  // Macros
   final _nomeCtrl = TextEditingController();
   final _caloriasCtrl = TextEditingController();
   final _protCtrl = TextEditingController();
@@ -549,7 +618,6 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
   final _gordCtrl = TextEditingController();
   final _qtdCtrl = TextEditingController(text: "100");
 
-  // Micros (Novos)
   final _fibraCtrl = TextEditingController();
   final _calcioCtrl = TextEditingController();
   final _magnesioCtrl = TextEditingController();
@@ -569,14 +637,10 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
         categoria: 'Personalizado',
         quantidade: double.tryParse(_qtdCtrl.text) ?? 100,
         unidade: 'g',
-        
-        // Macros
         calorias: double.tryParse(_caloriasCtrl.text) ?? 0,
         proteinas: double.tryParse(_protCtrl.text) ?? 0,
         carboidratos: double.tryParse(_carbCtrl.text) ?? 0,
         gorduras: double.tryParse(_gordCtrl.text) ?? 0,
-
-        // Micros
         fibras: double.tryParse(_fibraCtrl.text) ?? 0,
         calcio: double.tryParse(_calcioCtrl.text) ?? 0,
         magnesio: double.tryParse(_magnesioCtrl.text) ?? 0,
@@ -592,7 +656,7 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
     }
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.verde,
@@ -602,12 +666,11 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
-      // MUDANÇA AQUI: Usamos Column + Expanded para forçar o branco até o rodapé
       body: Column(
         children: [
           Expanded(
             child: Container(
-              width: double.infinity, // Garante que o branco ocupe a largura toda
+              width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: AppStyles.borderTopCard,
@@ -644,7 +707,6 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                       const Text("Micronutrientes (por 100g)", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                       const SizedBox(height: 15),
                       
-                      // Linha 1: Fibras, Cálcio
                       Row(children: [
                         Expanded(child: _buildInput(_fibraCtrl, "Fibras (g)")),
                         const SizedBox(width: 10),
@@ -652,7 +714,6 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                       ]),
                       const SizedBox(height: 10),
                       
-                      // Linha 2: Magnésio, Ferro
                       Row(children: [
                         Expanded(child: _buildInput(_magnesioCtrl, "Magnésio (mg)")),
                         const SizedBox(width: 10),
@@ -660,7 +721,6 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                       ]),
                       const SizedBox(height: 10),
 
-                      // Linha 3: Zinco e Riboflavina (Vitamina B2)
                       Row(children: [
                         Expanded(child: _buildInput(_zincoCtrl, "Zinco (mg)")),
                         const SizedBox(width: 10),
@@ -668,7 +728,6 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                       ]),
                       const SizedBox(height: 10),
 
-                      // Linha 4: Niacina (Vitamina B3) e Potássio
                       Row(children: [
                         Expanded(child: _buildInput(_niacinaCtrl, "B3/Niacina (mg)")),
                         const SizedBox(width: 10),
@@ -676,7 +735,6 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                       ]),
                       const SizedBox(height: 10),
 
-                      // Linha 5: Vitamina A e Vitamina C
                       Row(children: [
                         Expanded(child: _buildInput(_vitACtrl, "Vit. A (mcg)")),
                         const SizedBox(width: 10),
@@ -692,8 +750,7 @@ class _CriarAlimentoScreenState extends State<_CriarAlimentoScreen> {
                           child: const Text("ADICIONAR AO PLANO", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ),
-
-                      const SizedBox(height: 40), // Espaço extra final
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),

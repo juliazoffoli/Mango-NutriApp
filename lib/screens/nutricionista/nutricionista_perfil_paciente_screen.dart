@@ -794,7 +794,6 @@ Widget _buildMicroGridItem(String label, String value, Color color) {
                 decoration: BoxDecoration(
                   color: cor,
                   borderRadius: BorderRadius.circular(5),
-                  // MANTENDO A SOMBRA SOLICITADA
                   boxShadow: [
                     BoxShadow(color: cor.withOpacity(0.4), blurRadius: 6, offset: const Offset(0, 3)),
                   ]
@@ -875,7 +874,7 @@ Widget _buildMicroGridItem(String label, String value, Color color) {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: AppStyles.borderButton, // Radius 16
+        borderRadius: AppStyles.borderButton, 
         boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), spreadRadius: 2, blurRadius: 8, offset: const Offset(0, 2))],
         border: Border.all(color: Colors.grey.withOpacity(0.1)),
       ),
@@ -883,9 +882,14 @@ Widget _buildMicroGridItem(String label, String value, Color color) {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-          leading: Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: AppColors.verde.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.restaurant, color: AppColors.verde)),
+          leading: Container(
+            padding: const EdgeInsets.all(10), 
+            decoration: BoxDecoration(color: AppColors.verde.withOpacity(0.1), borderRadius: BorderRadius.circular(12)), 
+            child: const Icon(Icons.restaurant, color: AppColors.verde)
+          ),
           title: Text(refeicao.nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-          subtitle: Text('${refeicao.horario} • ${cal.toStringAsFixed(0)} kcal', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          // Se quiser mudar as calorias totais da refeição também para 2 casas, mude aqui:
+          subtitle: Text('${refeicao.horario} • ${cal.toStringAsFixed(1)} kcal', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
           children: [
             Container(
               color: Colors.grey[50],
@@ -898,9 +902,13 @@ Widget _buildMicroGridItem(String label, String value, Color color) {
                 ]),
                 const Divider(height: 20),
                 ...refeicao.alimentos.map((ali) => ListTile(
-                  contentPadding: EdgeInsets.zero, dense: true, visualDensity: VisualDensity.compact,
+                  contentPadding: EdgeInsets.zero, 
+                  dense: true, 
+                  visualDensity: VisualDensity.compact,
                   title: Text(ali.nome, style: const TextStyle(fontWeight: FontWeight.w500)),
-                  subtitle: Text("${ali.calorias} kcal / 100g"),
+                  
+                  subtitle: Text("${ali.calorias.toStringAsFixed(2)} kcal / 100g"),
+                  
                   trailing: Text("${ali.quantidade.toStringAsFixed(0)}g", style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.verde)))),
               ]),
             ),

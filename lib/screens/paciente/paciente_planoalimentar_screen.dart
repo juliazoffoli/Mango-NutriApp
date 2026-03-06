@@ -346,6 +346,7 @@ class _PacientePlanoAlimentarScreenState
               ),
             ],
           ),
+          
         ),
       ],
     );
@@ -665,7 +666,7 @@ class _PacientePlanoAlimentarScreenState
                           alimento.nome,
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
-                        subtitle: Text("${alimento.calorias} kcal / 100g"),
+                        subtitle: Text("${alimento.calorias.toStringAsFixed(2)} kcal / 100g"),
                         trailing: Text(
                           "${alimento.quantidade.toStringAsFixed(0)}g",
                           style: const TextStyle(

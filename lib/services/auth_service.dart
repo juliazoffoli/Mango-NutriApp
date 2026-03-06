@@ -83,7 +83,7 @@ class AuthService extends ChangeNotifier {
     String tipo, 
     String? crn, 
     String genero,
-    String dataNascimento, // <--- Novo parâmetro adicionado
+    String dataNascimento, 
   ) async {
     try {
       // 1. Cria o usuário no Firebase Auth
