@@ -38,7 +38,7 @@ O projeto integra a **Tabela TACO** (Tabela Brasileira de Composição de Alimen
 
 | Logo | Plano | Macros e Micronutrientes | Histórico de Avaliações |
 |:---:|:---:|:---:|:---:|
-| <img src="assets/logo_menor.png" width="200" height="400" alt="Logo" /> | <img src="assets/Plano.jpeg" width="200" height="400" alt="EditorPlano" /> | <img src="assets/Macros_Micros.jpeg" width="200" height="400" alt="MacrosMicros" /> | <img src="assets/Historico.jpeg" width="200" height="400" alt="Antropometria" /> |
+| <img src="assets/logo_menor.png" width="200" height="400" alt="Logo" /> | <img src="assets/Plano.jpeg" width="200" height="400" alt="Plano" /> | <img src="assets/Macros_Micros.jpeg" width="200" height="400" alt="Macros_Micros" /> | <img src="assets/Historico.jpeg" width="200" height="400" alt="Antropometria" /> |
 
 ## 🚀 Como Rodar o Projeto
 
