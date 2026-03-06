@@ -40,6 +40,8 @@ O projeto integra a **Tabela TACO** (Tabela Brasileira de Composição de Alimen
 |:---:|:---:|:---:|:---:|
 | <img src="assets/logo_menor.png" width="200" height="400" alt="Logo" /> | <img src="assets/planoAlimentar.jpeg" width="200" height="400" alt="Plano" /> | <img src="assets/Macro_e_micro.jpeg" width="200" height="400" alt="Macros_Micros" /> | <img src="assets/Historico.jpeg" width="200" height="400" alt="Antropometria" /> |
 
+* obs: imagens meramente ilustrativas
+
 ## 🚀 Como Rodar o Projeto
 
 Pré-requisitos: Flutter SDK instalado e configurado.
